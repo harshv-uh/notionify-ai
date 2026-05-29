@@ -22,7 +22,7 @@ Notionify AI takes a natural-language prompt and uses **LLaMA 3.3 70B via Groq**
 ### 1. Clone and install
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/notionify-ai.git
+git clone git clone https://github.com/harshv-uh/notionify-ai.git
 cd notionify-ai
 npm install
 npm start
@@ -47,21 +47,15 @@ Open `http://localhost:3000`
 
 ---
 
-## Deploy to Railway (recommended)
+## Deploy on Render (free)
 
-One-click deploy for a permanent public URL:
+1. Go to [render.com](https://render.com) → sign up with GitHub
+2. Click **New** → **Web Service**
+3. Select the `notionify-ai` repo
+4. Set **Build Command**: `npm install` and **Start Command**: `node server.js`
+5. Choose the **Free** plan → **Create Web Service**
 
-[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/new/template)
-
-Or manually:
-```bash
-# Install Railway CLI
-npm i -g @railway/cli
-railway login
-railway init
-railway up
-```
-
+🌐 Live demo: https://notionify-ai.onrender.com
 ---
 
 ## File Structure
