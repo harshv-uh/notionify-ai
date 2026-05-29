@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Notionify AI — Workspace Builder</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#03030a;--s1:#07070f;--s2:#0b0b18;--s3:#0f0f20;
+  --border:#151528;--border2:#1c1c35;--border3:#242445;
+  --text:#e8eaf8;--muted:#5a5d80;--muted2:#373960;
+  --blue:#4d9fff;--blue2:#2979e8;--blue-glow:rgba(77,159,255,0.18);--blue-dim:rgba(77,159,255,0.07);
+  --violet:#9c6bff;--violet2:#7c3fe8;--violet-glow:rgba(156,107,255,0.2);--violet-dim:rgba(156,107,255,0.07);
+  --cyan:#00e5ff;--cyan-glow:rgba(0,229,255,0.15);--cyan-dim:rgba(0,229,255,0.06);
+  --gold:#ffc845;--gold-glow:rgba(255,200,69,0.18);--gold-dim:rgba(255,200,69,0.07);
+  --green:#00e89a;--green-glow:rgba(0,232,154,0.15);
+  --red:#ff4d6a;
+  --r:12px;
+  --syne:'Syne',sans-serif;--mono:'DM Mono',monospace;--sans:'DM Sans',sans-serif;
+}
+html{scroll-behavior:smooth}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:100vh;
+  display:flex;align-items:flex-start;justify-content:center;padding:3rem 1rem 5rem;
+  overflow-x:hidden;}
+
+/* BG FX */
+body::before{content:'';position:fixed;inset:0;z-index:-2;
+  background-image:linear-gradient(rgba(77,159,255,0.025) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(77,159,255,0.025) 1px,transparent 1px);
+  background-size:52px 52px;}
+body::after{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background:
+    radial-gradient(ellipse 70% 40% at 15% 0%,rgba(124,63,232,0.07),transparent),
+    radial-gradient(ellipse 50% 30% at 85% 60%,rgba(77,159,255,0.06),transparent),
+    radial-gradient(ellipse 40% 25% at 50% 100%,rgba(0,229,255,0.04),transparent);}
+
+.wrap{width:100%;max-width:600px;position:relative;}
+
+/* TOP NAV */
+.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:2.5rem;}
+.back{font-size:12px;color:var(--muted);text-decoration:none;font-family:var(--mono);
+  letter-spacing:0.05em;transition:color 0.2s;display:flex;align-items:center;gap:6px;}
+.back:hover{color:var(--blue);}
+.topbadge{font-size:10px;font-family:var(--mono);letter-spacing:0.12em;color:var(--cyan);
+  border:1px solid rgba(0,229,255,0.2);background:var(--cyan-dim);
+  padding:4px 12px;border-radius:99px;}
+
+/* LOGO */
+.logo{text-align:center;margin-bottom:2.5rem;}
+.logo-icon{width:56px;height:56px;border-radius:16px;margin:0 auto 1rem;position:relative;
+  background:linear-gradient(135deg,rgba(77,159,255,0.12),rgba(156,107,255,0.12));
+  border:1px solid rgba(156,107,255,0.3);display:flex;align-items:center;justify-content:center;
+  font-size:24px;}
+.logo-icon::before{content:'';position:absolute;inset:-1px;border-radius:17px;
+  background:linear-gradient(135deg,rgba(77,159,255,0.4),rgba(156,107,255,0.4));
+  z-index:-1;filter:blur(8px);opacity:0.5;}
+.logo h1{font-family:var(--syne);font-size:26px;font-weight:800;letter-spacing:-0.5px;
+  background:linear-gradient(135deg,#fff 0%,var(--blue) 50%,var(--violet) 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.logo p{font-size:13px;color:var(--muted);margin-top:5px;letter-spacing:0.03em;}
+
+/* CARDS */
+.card{background:var(--s1);border:1px solid var(--border);border-radius:var(--r);
+  padding:1.5rem;margin-bottom:1rem;position:relative;overflow:hidden;transition:border-color 0.2s;}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(77,159,255,0.2),rgba(156,107,255,0.2),transparent);}
+.card:hover{border-color:var(--border2);}
+
+.clabel{font-size:10px;font-weight:700;letter-spacing:0.12em;color:var(--muted);
+  text-transform:uppercase;margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+.clabel .ci{font-size:13px;}
+.clabel::after{content:'';flex:1;height:1px;background:var(--border);}
+
+/* INPUTS */
+label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px;font-weight:500;font-family:var(--mono);letter-spacing:0.04em;}
+input,textarea{width:100%;background:var(--s2);border:1px solid var(--border2);
+  border-radius:9px;color:var(--text);font-family:var(--sans);font-size:14px;
+  padding:11px 14px;outline:none;transition:border-color 0.15s,box-shadow 0.15s;line-height:1.5;}
+input:focus,textarea:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-dim),0 0 16px var(--blue-glow);}
+input::placeholder,textarea::placeholder{color:var(--muted2);}
+textarea{resize:vertical;min-height:130px;line-height:1.7;}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.hint{font-size:11px;color:var(--muted2);margin-top:5px;font-family:var(--mono);}
+.hint a{color:var(--muted);text-decoration:none;border-bottom:1px solid var(--border2);}
+
+/* CHIPS */
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px;}
+.chip{font-size:12px;color:var(--muted);border:1px solid var(--border2);border-radius:99px;
+  padding:5px 13px;cursor:pointer;transition:all 0.15s;background:none;font-family:var(--sans);}
+.chip:hover{border-color:var(--violet);color:var(--violet);background:var(--violet-dim);
+  box-shadow:0 0 12px var(--violet-glow);}
+
+/* FEATURE TOGGLES */
+.feats{display:flex;flex-wrap:wrap;gap:7px;margin-top:4px;}
+.ftog{font-size:12px;color:var(--muted);border:1px solid var(--border2);border-radius:8px;
+  padding:6px 12px;cursor:pointer;transition:all 0.15s;background:none;font-family:var(--sans);
+  display:flex;align-items:center;gap:6px;user-select:none;}
+.ftog:hover{border-color:var(--border3);color:var(--text);}
+.ftog.on{border-color:rgba(77,159,255,0.5);color:var(--blue);background:var(--blue-dim);
+  box-shadow:0 0 10px rgba(77,159,255,0.1);}
+.ftog .fd{width:5px;height:5px;border-radius:50%;background:currentColor;flex-shrink:0;}
+
+/* BUILD BUTTON */
+.build-btn{width:100%;padding:15px;font-family:var(--syne);font-size:15px;font-weight:700;
+  letter-spacing:0.04em;border:none;border-radius:var(--r);cursor:pointer;
+  background:linear-gradient(135deg,var(--blue2),var(--violet2),#5b30d4);
+  color:#fff;position:relative;overflow:hidden;
+  box-shadow:0 4px 30px rgba(124,63,232,0.4),0 0 60px rgba(77,159,255,0.1);
+  display:flex;align-items:center;justify-content:center;gap:10px;transition:all 0.2s;}
+.build-btn::before{content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,transparent 0%,rgba(255,255,255,0.08) 50%,transparent 100%);
+  transform:translateX(-100%);transition:transform 0.5s;}
+.build-btn:hover::before{transform:translateX(100%);}
+.build-btn:hover{transform:translateY(-2px);box-shadow:0 8px 40px rgba(124,63,232,0.5),0 0 80px rgba(77,159,255,0.15);}
+.build-btn:disabled{opacity:0.35;cursor:not-allowed;transform:none;box-shadow:none;}
+.build-btn:disabled::before{display:none;}
+.btn-glow{position:absolute;inset:0;border-radius:var(--r);
+  background:linear-gradient(135deg,var(--blue2),var(--violet2));
+  filter:blur(16px);opacity:0.4;z-index:-1;transition:opacity 0.2s;}
+.build-btn:hover .btn-glow{opacity:0.7;}
+
+/* STATUS */
+.status{display:none;border-radius:var(--r);padding:1.4rem 1.5rem;margin-top:1rem;
+  font-size:14px;line-height:1.7;border:1px solid transparent;}
+.status.loading{display:block;background:var(--s1);border-color:var(--border2);}
+.status.success{display:block;background:rgba(0,232,154,0.05);border-color:rgba(0,232,154,0.2);color:var(--green);}
+.status.error{display:block;background:rgba(255,77,106,0.05);border-color:rgba(255,77,106,0.2);color:var(--red);}
+
+/* LOG */
+.log{font-family:var(--mono);font-size:11px;color:var(--muted2);margin-top:12px;max-height:180px;overflow-y:auto;}
+.log::-webkit-scrollbar{width:3px;}.log::-webkit-scrollbar-thumb{background:var(--border2);}
+.log-line{padding:2.5px 0;display:flex;align-items:flex-start;gap:6px;}
+.log-line::before{content:'›';flex-shrink:0;color:var(--border3);}
+.log-line.ok{color:#1e5c40;}.log-line.ok::before{content:'✓';color:var(--green);}
+.log-line.warn{color:#6b5800;}.log-line.warn::before{content:'⚡';color:var(--gold);}
+.log-line.act{color:#1d3a6b;}.log-line.act::before{content:'◈';color:var(--blue);}
+
+/* PROGRESS */
+.prog-wrap{margin-top:14px;}
+.prog-meta{font-size:11px;color:var(--muted);margin-bottom:6px;display:flex;justify-content:space-between;font-family:var(--mono);}
+.prog-bar{height:2px;background:var(--border2);border-radius:99px;overflow:hidden;position:relative;}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--blue2),var(--violet),var(--cyan));
+  width:0%;transition:width 0.6s cubic-bezier(0.4,0,0.2,1);border-radius:99px;position:relative;}
+.prog-fill::after{content:'';position:absolute;right:0;top:-2px;width:6px;height:6px;
+  border-radius:50%;background:var(--cyan);box-shadow:0 0 8px var(--cyan-glow);}
+
+/* STEP DOTS */
+.steps{display:flex;gap:5px;margin-top:12px;flex-wrap:wrap;}
+.sdot{width:6px;height:6px;border-radius:50%;background:var(--border2);transition:all 0.3s;}
+.sdot.active{background:var(--blue);box-shadow:0 0 8px var(--blue-glow);}
+.sdot.done{background:var(--green);box-shadow:0 0 6px var(--green-glow);}
+
+/* OPEN LINK */
+.open-link{display:inline-flex;align-items:center;gap:7px;margin-top:14px;
+  color:var(--cyan);font-size:13px;font-weight:600;text-decoration:none;font-family:var(--mono);
+  border:1px solid rgba(0,229,255,0.2);padding:9px 18px;border-radius:9px;
+  background:var(--cyan-dim);transition:all 0.15s;letter-spacing:0.03em;}
+.open-link:hover{background:rgba(0,229,255,0.1);box-shadow:0 0 20px var(--cyan-glow);}
+
+/* SPINNER */
+.spin{width:14px;height:14px;border:2px solid rgba(255,255,255,0.15);border-top-color:#fff;
+  border-radius:50%;animation:rot 0.6s linear infinite;flex-shrink:0;}
+@keyframes rot{to{transform:rotate(360deg)}}
+
+/* DIVIDER */
+.sep{height:1px;background:linear-gradient(90deg,transparent,var(--border2),transparent);margin:1.5rem 0;}
+
+/* GLOW ACCENT LINE */
+.accent-line{width:40px;height:2px;border-radius:99px;margin:0 auto 1rem;
+  background:linear-gradient(90deg,var(--blue),var(--violet));
+  box-shadow:0 0 12px rgba(156,107,255,0.5);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a href="/" class="back">← notionify.ai</a>
+    <div class="topbadge">v2.0 PRO</div>
+  </div>
+
+  <div class="logo">
+    <div class="logo-icon">✦</div>
+    <div class="accent-line"></div>
+    <h1>Notionify AI</h1>
+    <p>Describe your workspace — AI builds it in Notion instantly</p>
+  </div>
+
+  <!-- Credentials -->
+  <div class="card">
+    <div class="clabel"><span class="ci">🔑</span> Credentials</div>
+    <div class="row" style="margin-bottom:14px;">
+      <div>
+        <label>Groq API Key</label>
+        <input type="password" id="groqKey" placeholder="gsk_..."/>
+        <p class="hint"><a href="https://console.groq.com" target="_blank">console.groq.com</a> — free</p>
+      </div>
+      <div>
+        <label>Notion Token</label>
+        <input type="password" id="notionKey" placeholder="secret_..."/>
+        <p class="hint"><a href="https://www.notion.so/my-integrations" target="_blank">my-integrations</a></p>
+      </div>
+    </div>
+    <div>
+      <label>Parent Page URL or ID</label>
+      <input type="text" id="pageId" placeholder="Paste your Notion page URL — ID extracted automatically"/>
+      <p class="hint" id="idHint">Your integration must have access to this page</p>
+    </div>
+  </div>
+
+  <!-- Prompt -->
+  <div class="card">
+    <div class="clabel"><span class="ci">✦</span> Describe your workspace</div>
+    <textarea id="prompt" placeholder="e.g. Build me a startup CRM with contacts linked to a deals pipeline, formula for monthly ARR, meeting notes with toggle sections, and a weekly dashboard..."></textarea>
+    <div class="chips">
+      <button class="chip" onclick="setPrompt('Startup CRM: contacts linked to deals pipeline, meeting notes per client, ARR formula, activity log with rollup')">🏢 Startup CRM</button>
+      <button class="chip" onclick="setPrompt('Freelancer HQ: clients linked to projects, invoices with formula totals, time tracker, contract templates')">💼 Freelancer HQ</button>
+      <button class="chip" onclick="setPrompt('Product OS: roadmap linked to features and bugs, sprint tracker with velocity formula, OKR dashboard')">🚀 Product OS</button>
+      <button class="chip" onclick="setPrompt('Knowledge base: books with rating formula, notes linked to books, weekly review template, goals tracker')">📚 Knowledge Base</button>
+      <button class="chip" onclick="setPrompt('Content studio: editorial calendar linked to articles, SEO tracker with score formula, brand assets page')">✍️ Content Studio</button>
+      <button class="chip" onclick="setPrompt('Hiring pipeline: job openings linked to candidates, interview notes, offer tracker with compensation formula')">👥 Hiring Pipeline</button>
+    </div>
+  </div>
+
+  <!-- Features -->
+  <div class="card">
+    <div class="clabel"><span class="ci">⚙</span> Features</div>
+    <div class="feats">
+      <button class="ftog on" data-feat="cover" onclick="toggleFeat(this)"><span class="fd"></span>Cover images</button>
+      <button class="ftog on" data-feat="gifs" onclick="toggleFeat(this)"><span class="fd"></span>Inline GIFs</button>
+      <button class="ftog on" data-feat="callouts" onclick="toggleFeat(this)"><span class="fd"></span>Styled callouts</button>
+      <button class="ftog on" data-feat="toggles" onclick="toggleFeat(this)"><span class="fd"></span>Toggle sections</button>
+      <button class="ftog on" data-feat="relations" onclick="toggleFeat(this)"><span class="fd"></span>DB Relations</button>
+      <button class="ftog on" data-feat="rollups" onclick="toggleFeat(this)"><span class="fd"></span>Rollups</button>
+      <button class="ftog on" data-feat="formulas" onclick="toggleFeat(this)"><span class="fd"></span>Formulas</button>
+      <button class="ftog on" data-feat="sample_rows" onclick="toggleFeat(this)"><span class="fd"></span>Sample rows</button>
+    </div>
+  </div>
+
+  <div style="position:relative;margin-bottom:1rem;">
+    <div class="btn-glow"></div>
+    <button class="build-btn" id="buildBtn" onclick="build()">
+      ✦ &nbsp;Generate &amp; Build in Notion
+    </button>
+  </div>
+
+  <div class="status" id="status">
+    <div id="statusMsg"></div>
+    <div class="prog-wrap">
+      <div class="prog-meta"><span id="progLabel">Initialising...</span><span id="progPct">0%</span></div>
+      <div class="prog-bar"><div class="prog-fill" id="prog"></div></div>
+    </div>
+    <div class="steps" id="steps"></div>
+    <div class="log" id="log"></div>
+    <a href="#" id="openLink" class="open-link" style="display:none" target="_blank">◈ Open in Notion ↗</a>
+  </div>
+
+</div>
+<script>
+const $=id=>document.getElementById(id);
+
+document.addEventListener('DOMContentLoaded',()=>{
+  ['input','paste','change'].forEach(ev=>
+    $('pageId').addEventListener(ev,()=>setTimeout(extractId,50)));
+});
+
+function extractId(){
+  const input=$('pageId'),hint=$('idHint');
+  const val=input.value.trim().split('?')[0].split('#')[0];
+  const match=val.match(/([a-f0-9]{32})/i)||val.match(/([a-f0-9-]{36})/i);
+  if(match){
+    const id=match[1].replace(/-/g,'');
+    input.dataset.cleanId=id;
+    hint.textContent='✓ ID: '+id.slice(0,8)+'...'+id.slice(-4);
+    hint.style.color='#00e89a';
+  }else{
+    input.dataset.cleanId='';
+    hint.textContent='Your integration must have access to this page';
+    hint.style.color='';
+  }
+}
+
+function setPrompt(t){$('prompt').value=t;$('prompt').focus();}
+function toggleFeat(el){el.classList.toggle('on');}
+function featOn(name){return!!document.querySelector(`[data-feat="${name}"].on`);}
+
+function addLog(msg,cls=''){
+  const el=$('log'),d=document.createElement('div');
+  d.className='log-line'+(cls?' '+cls:'');d.textContent=msg;
+  el.appendChild(d);el.scrollTop=el.scrollHeight;
+}
+
+let _steps=[];
+function initSteps(n){
+  const el=$('steps');el.innerHTML='';
+  _steps=Array.from({length:n},()=>{
+    const d=document.createElement('div');d.className='sdot';el.appendChild(d);return d;
+  });
+}
+function stepActive(i){if(_steps[i])_steps[i].className='sdot active';}
+function stepDone(i){if(_steps[i])_steps[i].className='sdot done';}
+
+function setStatus(type,msg){
+  const el=$('status');el.className='status '+type;
+  $('statusMsg').innerHTML=msg;$('log').innerHTML='';
+  $('openLink').style.display='none';setProgress(0,'');
+}
+function setProgress(pct,label){
+  $('prog').style.width=pct+'%';$('progPct').textContent=Math.round(pct)+'%';
+  if(label)$('progLabel').textContent=label;
+}
+
+const COVERS={crm:'office,team',freelancer:'laptop,coffee',product:'technology,startup',
+  knowledge:'books,library',content:'writing,creative',hiring:'interview,people',default:'workspace,minimal'};
+function getCoverUrl(title=''){
+  const t=title.toLowerCase();
+  const key=Object.keys(COVERS).find(k=>t.includes(k))||'default';
+  return`https://source.unsplash.com/1600x400/?${COVERS[key]}&sig=${Math.random().toString(36).slice(2)}`;
+}
+
+async function fetchGif(keyword='productivity'){
+  try{
+    const r=await fetch(`https://tenor.googleapis.com/v2/search?q=${keyword}&key=AIzaSyAyimkuYQYF_FXVALexPzpAT7lXxqO93_M&limit=1&media_filter=gif`);
+    const d=await r.json();
+    return d?.results?.[0]?.media_formats?.gif?.url||null;
+  }catch{return null;}
+}
+
+async function callGroq(apiKey,userPrompt,features){
+  const fl=Object.entries(features).filter(([,v])=>v).map(([k])=>k).join(', ');
+  const system=`You are an elite Notion workspace architect. Design RICH, PROFESSIONAL, DEEPLY FUNCTIONAL Notion workspaces.
+
+Respond ONLY with valid JSON — no markdown, no backticks, no explanation.
+
+Features requested: ${fl}
+
+Return this exact JSON structure:
+{
+  "title": "Workspace name",
+  "description": "2-sentence description",
+  "cover_keyword": "one word for Unsplash",
+  "databases": [
+    {
+      "id": "db_slug_no_spaces",
+      "title": "Database title",
+      "emoji": "single emoji",
+      "properties": [
+        {"name": "Status", "type": "select", "options": ["Not Started","In Progress","In Review","Done"]},
+        {"name": "Priority", "type": "select", "options": ["🔴 High","🟡 Medium","🟢 Low"]},
+        {"name": "Due Date", "type": "date"},
+        {"name": "Tags", "type": "multi_select", "options": ["Strategy","Execution","Research"]},
+        {"name": "Value", "type": "number"},
+        {"name": "Score", "type": "formula", "expression": "if(prop(\\"Priority\\") == \\"🔴 High\\", 3, if(prop(\\"Priority\\") == \\"🟡 Medium\\", 2, 1))"},
+        {"name": "Related", "type": "relation", "related_db": "other_db_slug"}
+      ],
+      "sample_rows": [
+        {"Name": "Example item 1", "Status": "In Progress", "Priority": "🔴 High"},
+        {"Name": "Example item 2", "Status": "Not Started", "Priority": "🟡 Medium"}
+      ]
+    }
+  ],
+  "pages": [
+    {
+      "title": "Page title",
+      "emoji": "single emoji",
+      "content": [
+        {"type": "heading_1", "text": "Main heading"},
+        {"type": "callout", "text": "Welcome! This workspace helps you...", "emoji": "👋", "color": "blue_background"},
+        {"type": "paragraph", "text": "Description paragraph."},
+        {"type": "heading_2", "text": "Section"},
+        {"type": "toggle", "text": "📌 Getting Started", "children": [
+          {"type": "paragraph", "text": "Step 1: Set up databases."},
+          {"type": "bulleted_list_item", "text": "Fill in first entries"}
+        ]},
+        {"type": "toggle", "text": "🎯 This Week", "children": [
+          {"type": "to_do", "text": "Review pipeline", "checked": false}
+        ]},
+        {"type": "callout", "text": "Pro tip: embed linked database views here.", "emoji": "💡", "color": "yellow_background"},
+        {"type": "divider"},
+        {"type": "gif_placeholder", "keyword": "productivity"}
+      ]
+    }
+  ]
+}
+
+RULES:
+- 2-3 databases and 1-2 pages
+- At least one relation between databases (use id slugs)
+- At least one formula per database
+- Pages: 8-12 blocks, rich variety of types
+- Use all callout colors: blue_background yellow_background green_background red_background purple_background gray_background
+- 2-3 sample_rows per database, realistic data
+- 1-2 gif_placeholders per page
+- Everything PROFESSIONAL and REALISTIC
+- ONLY return JSON`;
+
+  const res=await fetch('/api/groq',{
+    method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({apiKey,system,prompt:userPrompt})
+  });
+  const data=await res.json();
+  if(data.error)throw new Error(data.error.message||JSON.stringify(data.error));
+  const text=data?.choices?.[0]?.message?.content||'';
+  if(!text)throw new Error('Empty response from Groq');
+  return JSON.parse(text.replace(/^```json\s*/,'').replace(/```\s*$/,'').trim());
+}
+
+function rt(t){return[{type:'text',text:{content:t||''}}];}
+
+function buildBlock(b){
+  switch(b.type){
+    case 'divider':return{object:'block',type:'divider',divider:{}};
+    case 'callout':return{object:'block',type:'callout',callout:{rich_text:rt(b.text),icon:{type:'emoji',emoji:b.emoji||'💡'},color:b.color||'gray_background'}};
+    case 'toggle':return{object:'block',type:'toggle',toggle:{rich_text:rt(b.text),children:(b.children||[]).map(buildBlock)}};
+    case 'to_do':return{object:'block',type:'to_do',to_do:{rich_text:rt(b.text),checked:b.checked||false}};
+    case 'image':return{object:'block',type:'image',image:{type:'external',external:{url:b.url}}};
+    case 'gif_placeholder':return null;
+    default:{const t=b.type;return{object:'block',type:t,[t]:{rich_text:rt(b.text)}};}
+  }
+}
+
+async function createDB(notionKey,parentId,db,dbIdMap,features){
+  const props={Name:{title:{}}};
+  for(const p of(db.properties||[])){
+    if(p.name==='Name'||p.name==='Title')continue;
+    if(p.type==='select')props[p.name]={select:{options:p.options.map(o=>({name:o}))}};
+    else if(p.type==='multi_select')props[p.name]={multi_select:{options:p.options.map(o=>({name:o}))}};
+    else if(p.type==='date')props[p.name]={date:{}};
+    else if(p.type==='number')props[p.name]={number:{format:'number'}};
+    else if(p.type==='checkbox')props[p.name]={checkbox:{}};
+    else if(p.type==='url')props[p.name]={url:{}};
+    else if(p.type==='formula'&&features.formulas)props[p.name]={formula:{expression:p.expression||'prop("Name")'}};
+    else if(p.type==='relation'&&features.relations){
+      const relId=dbIdMap[p.related_db];
+      if(relId)props[p.name]={relation:{database_id:relId,single_property:{}}};
+    }else if(!['formula','relation','rollup'].includes(p.type))props[p.name]={rich_text:{}};
+  }
+  const payload={parent:{type:'page_id',page_id:parentId},icon:{type:'emoji',emoji:db.emoji||'📋'},
+    title:rt(db.title),properties:props,is_inline:false};
+  if(features.cover)payload.cover={type:'external',external:{url:getCoverUrl(db.title)}};
+  const res=await fetch('/api/notion/databases',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({notionToken:notionKey,payload})});
+  const data=await res.json();
+  if(data.object==='error')throw new Error(`DB "${db.title}": ${data.message}`);
+  return data;
+}
+
+async function createSampleRows(notionKey,dbId,rows,dbProps){
+  for(const row of(rows||[])){
+    const props={Name:{title:rt(row.Name||row.name||'Untitled')}};
+    for(const[k,v]of Object.entries(row)){
+      if(k==='Name'||k==='name')continue;
+      const pd=dbProps?.[k];if(!pd)continue;
+      const t=Object.keys(pd).find(x=>!['id','name','type'].includes(x));if(!t)continue;
+      if(t==='select')props[k]={select:{name:String(v)}};
+      else if(t==='multi_select')props[k]={multi_select:String(v).split(',').map(s=>({name:s.trim()}))};
+      else if(t==='date')props[k]={date:{start:new Date().toISOString().slice(0,10)}};
+      else if(t==='number')props[k]={number:Number(v)||0};
+      else if(t==='checkbox')props[k]={checkbox:Boolean(v)};
+      else props[k]={rich_text:rt(String(v))};
+    }
+    await fetch('/api/notion/db-rows',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({notionToken:notionKey,payload:{parent:{database_id:dbId},properties:props}})}).catch(()=>{});
+  }
+}
+
+async function createPage(notionKey,parentId,page,features){
+  const payload={parent:{type:'page_id',page_id:parentId},icon:{type:'emoji',emoji:page.emoji||'📄'},
+    properties:{title:{title:rt(page.title)}}};
+  if(features.cover)payload.cover={type:'external',external:{url:getCoverUrl(page.title)}};
+  const res=await fetch('/api/notion/pages',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({notionToken:notionKey,payload})});
+  const data=await res.json();
+  if(data.object==='error')throw new Error(`Page "${page.title}": ${data.message}`);
+  const blocks=[];
+  for(const b of(page.content||[])){
+    if(b.type==='gif_placeholder'&&features.gifs){
+      const url=await fetchGif(b.keyword||'productivity');
+      if(url)blocks.push({object:'block',type:'image',image:{type:'external',external:{url}}});
+    }else{const built=buildBlock(b);if(built)blocks.push(built);}
+  }
+  if(blocks.length){
+    for(let i=0;i<blocks.length;i+=100){
+      await fetch(`/api/notion/blocks/${data.id}/children`,{method:'PATCH',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({notionToken:notionKey,children:blocks.slice(i,i+100)})});
+    }
+  }
+  return data.url;
+}
+
+async function build(){
+  const groqKey=$('groqKey').value.trim();
+  const notionKey=$('notionKey').value.trim();
+  const pi=$('pageId');
+  const pageId=(pi.dataset.cleanId||pi.value.trim()).replace(/[^a-f0-9]/gi,'').substring(0,32);
+  const prompt=$('prompt').value.trim();
+
+  if(!groqKey||!notionKey||!pageId||!prompt){
+    setStatus('error','⚠ Please fill in all fields before building.');return;
+  }
+
+  const features={cover:featOn('cover'),gifs:featOn('gifs'),callouts:featOn('callouts'),
+    toggles:featOn('toggles'),relations:featOn('relations'),rollups:featOn('rollups'),
+    formulas:featOn('formulas'),sample_rows:featOn('sample_rows')};
+
+  const btn=$('buildBtn');
+  btn.disabled=true;
+  btn.innerHTML='<div class="spin"></div> Building your workspace...';
+  setStatus('loading','<strong style="color:var(--text)">Asking LLaMA 3.3 to architect your workspace...</strong>');
+  setProgress(5,'Designing...');
+
+  try{
+    addLog('Sending to Groq LLaMA 3.3 70B...','act');
+    const plan=await callGroq(groqKey,prompt,features);
+    addLog(`Plan: "${plan.title}" — ${plan.databases?.length||0} DBs, ${plan.pages?.length||0} pages`,'ok');
+    setProgress(20,'Creating in Notion...');
+
+    const total=(plan.databases?.length||0)+(plan.pages?.length||0);
+    initSteps(total);
+    let idx=0,firstUrl=null;
+    const dbIdMap={},dbObjs={};
+
+    $('statusMsg').innerHTML='<strong style="color:var(--text)">Creating databases...</strong>';
+    for(const db of(plan.databases||[])){
+      stepActive(idx);
+      addLog(`Creating: ${db.emoji||''} ${db.title}`,'act');
+      const dbN=await createDB(notionKey,pageId,db,dbIdMap,features);
+      dbIdMap[db.id]=dbN.id;dbObjs[db.id]={notion:dbN,def:db};
+      if(!firstUrl)firstUrl=dbN.url;
+      addLog(`${db.title} created`,'ok');
+      stepDone(idx++);
+      setProgress(20+(idx/total)*35,`Databases (${idx}/${plan.databases.length})`);
+    }
+
+    if(features.relations){
+      addLog('Wiring relations...','act');
+      for(const[,{notion:dbN,def:db}]of Object.entries(dbObjs)){
+        const extra={};
+        for(const p of(db.properties||[])){
+          if(p.type==='relation'){const rId=dbIdMap[p.related_db];if(rId)extra[p.name]={relation:{database_id:rId,single_property:{}}};}
+        }
+        if(Object.keys(extra).length){
+          await fetch(`/api/notion/databases/${dbN.id}`,{method:'PATCH',headers:{'Content-Type':'application/json'},
+            body:JSON.stringify({notionToken:notionKey,payload:{properties:extra}})})
+            .then(r=>r.json()).then(d=>{if(d.object!=='error')addLog(`Relations: ${db.title}`,'ok');});
+        }
+      }
+    }
+
+    if(features.sample_rows){
+      addLog('Adding sample rows...','act');
+      for(const[,{notion:dbN,def:db}]of Object.entries(dbObjs)){
+        if(db.sample_rows?.length){
+          await createSampleRows(notionKey,dbN.id,db.sample_rows,dbN.properties);
+          addLog(`Sample data: ${db.title}`,'ok');
+        }
+      }
+    }
+
+    setProgress(65,'Creating pages...');
+    $('statusMsg').innerHTML='<strong style="color:var(--text)">Building pages...</strong>';
+    for(const page of(plan.pages||[])){
+      stepActive(idx);
+      addLog(`Creating: ${page.emoji||''} ${page.title}`,'act');
+      const url=await createPage(notionKey,pageId,page,features);
+      if(!firstUrl)firstUrl=url;
+      addLog(`${page.title} built`,'ok');
+      stepDone(idx++);
+      setProgress(65+(((idx-(plan.databases?.length||0))/(plan.pages?.length||1))*30),
+        `Pages (${idx-(plan.databases?.length||0)}/${plan.pages?.length})`);
+    }
+
+    setProgress(100,'Complete ✓');
+    setStatus('success',
+      `<strong>✓ "${plan.title}" is live in Notion</strong><br><span style="font-size:13px;opacity:0.8">${plan.description}</span>`);
+    if(firstUrl){$('openLink').href=firstUrl;$('openLink').style.display='inline-flex';}
+    btn.innerHTML='✓ Workspace built!';
+    btn.style.background='linear-gradient(135deg,#0a4f30,#0f7a4a)';
+    btn.style.boxShadow='0 4px 24px rgba(0,232,154,0.25)';
+
+  }catch(err){
+    setStatus('error',`<strong>Error:</strong> ${err.message}`);
+    addLog('Check: Notion token valid & connected to page','warn');
+    addLog('Check: Groq key correct at console.groq.com','warn');
+    addLog('Check: Page ID is 32-char hex','warn');
+    btn.disabled=false;btn.innerHTML='↺ Try again';
+    btn.style.background='';btn.style.boxShadow='';
+  }
+}
+</script>
+</body>
+</html>

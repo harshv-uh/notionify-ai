@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Notionify AI — Build Beautiful Notion Workspaces Instantly</title>
+<meta name="description" content="Describe your workspace. Notionify AI builds it in Notion — with databases, formulas, cover images, relations, and sample data. No manual work."/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#04040a;
+  --s1:#070710;--s2:#0a0a16;--s3:#0d0d1c;
+  --border:#14142a;--border2:#1e1e38;--border3:#252545;
+  --text:#eceeff;--muted:#6b6d90;--muted2:#3d3f60;
+  --blue:#5b8dee;--blue2:#3d6fde;--blue-glow:rgba(91,141,238,0.2);--blue-dim:rgba(91,141,238,0.08);
+  --violet:#9b6dff;--violet-glow:rgba(155,109,255,0.2);
+  --cyan:#22d3ee;--cyan-dim:rgba(34,211,238,0.08);
+  --gold:#f0c040;--gold-dim:rgba(240,192,64,0.1);
+  --green:#22c55e;
+  --r:10px;
+  --syne:'Syne',sans-serif;
+  --mono:'DM Mono',monospace;
+  --sans:'DM Sans',sans-serif;
+}
+
+html{scroll-behavior:smooth;}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);overflow-x:hidden;line-height:1.6;}
+
+/* ── NOISE TEXTURE ── */
+body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  background-size:200px 200px;opacity:0.6;}
+
+/* ── GRID ── */
+.grid-bg{position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:linear-gradient(rgba(91,141,238,0.03) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(91,141,238,0.03) 1px,transparent 1px);
+  background-size:56px 56px;}
+
+/* ── GLOW ORBS ── */
+.orb{position:fixed;border-radius:50%;filter:blur(80px);pointer-events:none;z-index:0;}
+.orb1{width:600px;height:600px;background:radial-gradient(circle,rgba(91,141,238,0.08),transparent 70%);top:-200px;left:-100px;}
+.orb2{width:500px;height:500px;background:radial-gradient(circle,rgba(155,109,255,0.07),transparent 70%);top:40%;right:-150px;}
+.orb3{width:400px;height:400px;background:radial-gradient(circle,rgba(34,211,238,0.05),transparent 70%);bottom:10%;left:20%;}
+
+section,nav,footer{position:relative;z-index:1;}
+
+/* ── NAV ── */
+nav{display:flex;align-items:center;justify-content:space-between;padding:1.25rem 2.5rem;
+  border-bottom:1px solid var(--border);backdrop-filter:blur(20px);
+  position:sticky;top:0;z-index:100;background:rgba(4,4,10,0.85);}
+.nav-logo{font-family:var(--syne);font-weight:800;font-size:17px;letter-spacing:-0.5px;
+  display:flex;align-items:center;gap:8px;}
+.nav-logo .dot{width:8px;height:8px;border-radius:50%;background:var(--blue);
+  box-shadow:0 0 10px var(--blue-glow);animation:pulse 2s ease-in-out infinite;}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.6;transform:scale(0.8)}}
+.nav-links{display:flex;align-items:center;gap:2rem;}
+.nav-links a{font-size:13px;color:var(--muted);text-decoration:none;transition:color 0.2s;font-weight:500;}
+.nav-links a:hover{color:var(--text);}
+.nav-cta{font-size:13px;font-weight:600;font-family:var(--syne);padding:8px 18px;border-radius:8px;
+  background:var(--blue);color:#fff;text-decoration:none;transition:all 0.2s;letter-spacing:0.02em;
+  box-shadow:0 0 20px rgba(91,141,238,0.3);}
+.nav-cta:hover{background:var(--blue2);box-shadow:0 0 30px rgba(91,141,238,0.5);}
+
+/* ── HERO ── */
+.hero{text-align:center;padding:8rem 2rem 6rem;max-width:900px;margin:0 auto;}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-family:var(--mono);
+  color:var(--cyan);border:1px solid rgba(34,211,238,0.2);background:rgba(34,211,238,0.05);
+  padding:6px 14px;border-radius:99px;margin-bottom:2rem;letter-spacing:0.05em;
+  animation:fadeUp 0.6s ease both;}
+.hero-badge::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--cyan);
+  box-shadow:0 0 8px var(--cyan);}
+.hero h1{font-family:var(--syne);font-size:clamp(42px,6vw,76px);font-weight:800;line-height:1.05;
+  letter-spacing:-2px;margin-bottom:1.5rem;animation:fadeUp 0.6s 0.1s ease both;opacity:0;}
+.hero h1 .line1{display:block;color:var(--text);}
+.hero h1 .line2{display:block;
+  background:linear-gradient(135deg,var(--blue) 0%,var(--violet) 50%,var(--cyan) 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.hero-sub{font-size:17px;color:var(--muted);max-width:560px;margin:0 auto 2.5rem;line-height:1.7;
+  font-weight:300;animation:fadeUp 0.6s 0.2s ease both;opacity:0;}
+.hero-actions{display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;
+  animation:fadeUp 0.6s 0.3s ease both;opacity:0;}
+.btn-primary{font-family:var(--syne);font-weight:700;font-size:15px;letter-spacing:0.03em;
+  padding:14px 28px;border-radius:10px;border:none;cursor:pointer;
+  background:linear-gradient(135deg,var(--blue2),var(--violet));color:#fff;
+  box-shadow:0 4px 30px rgba(91,141,238,0.35);transition:all 0.2s;text-decoration:none;display:inline-flex;align-items:center;gap:8px;}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 40px rgba(91,141,238,0.5);}
+.btn-secondary{font-family:var(--syne);font-weight:600;font-size:15px;
+  padding:14px 28px;border-radius:10px;border:1px solid var(--border2);
+  background:transparent;color:var(--muted);cursor:pointer;transition:all 0.2s;text-decoration:none;display:inline-flex;align-items:center;gap:8px;}
+.btn-secondary:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-dim);}
+.hero-note{font-size:12px;color:var(--muted2);margin-top:1.5rem;font-family:var(--mono);
+  animation:fadeUp 0.6s 0.4s ease both;opacity:0;}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── HERO DEMO CARD ── */
+.hero-demo{max-width:780px;margin:4rem auto 0;animation:fadeUp 0.8s 0.5s ease both;opacity:0;}
+.demo-window{background:var(--s1);border:1px solid var(--border2);border-radius:14px;overflow:hidden;
+  box-shadow:0 30px 80px rgba(0,0,0,0.5),0 0 0 1px rgba(91,141,238,0.05),inset 0 1px 0 rgba(255,255,255,0.03);}
+.demo-bar{background:var(--s2);border-bottom:1px solid var(--border);padding:12px 16px;
+  display:flex;align-items:center;gap:8px;}
+.demo-dot{width:10px;height:10px;border-radius:50%;}
+.demo-dot:nth-child(1){background:#ff5f57;}
+.demo-dot:nth-child(2){background:#febc2e;}
+.demo-dot:nth-child(3){background:#28c840;}
+.demo-url{flex:1;background:var(--s3);border-radius:6px;padding:5px 12px;font-size:11px;
+  font-family:var(--mono);color:var(--muted2);margin:0 12px;}
+.demo-body{padding:2rem;display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;}
+.demo-left{display:flex;flex-direction:column;gap:12px;}
+.demo-label{font-size:10px;font-family:var(--mono);color:var(--muted2);letter-spacing:0.1em;margin-bottom:4px;}
+.demo-input{background:var(--s2);border:1px solid var(--border2);border-radius:8px;padding:10px 12px;font-size:12px;color:var(--muted);font-family:var(--sans);}
+.demo-prompt{background:var(--s2);border:1px solid var(--border2);border-radius:8px;padding:12px;font-size:12px;color:var(--text);font-family:var(--sans);line-height:1.6;min-height:80px;}
+.demo-prompt .cursor{display:inline-block;width:2px;height:13px;background:var(--blue);margin-left:2px;animation:blink 1s infinite;vertical-align:middle;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+.demo-features{display:flex;flex-wrap:wrap;gap:6px;}
+.demo-feat{font-size:11px;padding:4px 10px;border-radius:99px;border:1px solid var(--border2);color:var(--muted2);font-family:var(--mono);}
+.demo-feat.on{border-color:rgba(91,141,238,0.4);color:var(--blue);background:var(--blue-dim);}
+.demo-btn{width:100%;padding:12px;border-radius:8px;border:none;cursor:pointer;
+  background:linear-gradient(135deg,var(--blue2),var(--violet));color:#fff;
+  font-family:var(--syne);font-weight:700;font-size:13px;letter-spacing:0.03em;margin-top:4px;}
+.demo-right{display:flex;flex-direction:column;gap:10px;}
+.demo-log-title{font-size:11px;font-family:var(--mono);color:var(--muted2);letter-spacing:0.08em;margin-bottom:4px;}
+.demo-log{background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:12px;font-family:var(--mono);font-size:11px;display:flex;flex-direction:column;gap:5px;flex:1;}
+.dlog{display:flex;align-items:flex-start;gap:6px;color:var(--muted2);}
+.dlog.ok{color:#2d6b47;}.dlog.ok::before{content:'✓';color:var(--green);}
+.dlog.act{color:#3a5080;}.dlog.act::before{content:'◈';color:var(--blue);}
+.dlog::before{content:'›';flex-shrink:0;}
+.demo-prog{background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:12px;}
+.dp-label{font-size:11px;font-family:var(--mono);color:var(--muted2);margin-bottom:8px;display:flex;justify-content:space-between;}
+.dp-bar{height:3px;background:var(--border2);border-radius:99px;overflow:hidden;}
+.dp-fill{height:100%;width:72%;background:linear-gradient(90deg,var(--blue2),var(--violet),var(--cyan));border-radius:99px;box-shadow:0 0 8px var(--blue-glow);}
+.demo-steps{display:flex;gap:4px;flex-wrap:wrap;}
+.ds{font-size:10px;padding:3px 8px;border-radius:99px;font-family:var(--mono);}
+.ds.done{border:1px solid rgba(34,197,94,0.3);color:var(--green);background:rgba(34,197,94,0.06);}
+.ds.act{border:1px solid rgba(91,141,238,0.4);color:var(--blue);background:var(--blue-dim);}
+.ds.idle{border:1px solid var(--border);color:var(--muted2);}
+
+/* ── SECTION SHARED ── */
+.section{padding:6rem 2rem;}
+.section-inner{max-width:1080px;margin:0 auto;}
+.section-tag{font-size:11px;font-family:var(--mono);color:var(--blue);letter-spacing:0.15em;
+  text-transform:uppercase;margin-bottom:1rem;display:flex;align-items:center;gap:8px;}
+.section-tag::before{content:'';width:20px;height:1px;background:var(--blue);}
+.section-title{font-family:var(--syne);font-size:clamp(28px,4vw,44px);font-weight:800;
+  letter-spacing:-1px;line-height:1.1;margin-bottom:1rem;}
+.section-sub{font-size:16px;color:var(--muted);max-width:520px;line-height:1.7;font-weight:300;}
+
+/* ── FEATURES ── */
+.features-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1px;
+  background:var(--border);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-top:4rem;}
+.feat-card{background:var(--s1);padding:2rem;transition:background 0.2s;position:relative;}
+.feat-card:hover{background:var(--s2);}
+.feat-card::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,transparent,var(--blue),transparent);opacity:0;transition:opacity 0.3s;}
+.feat-card:hover::after{opacity:1;}
+.feat-icon{width:40px;height:40px;border-radius:10px;background:var(--blue-dim);
+  border:1px solid rgba(91,141,238,0.2);display:flex;align-items:center;justify-content:center;
+  font-size:18px;margin-bottom:1.2rem;}
+.feat-title{font-family:var(--syne);font-size:16px;font-weight:700;margin-bottom:8px;letter-spacing:-0.3px;}
+.feat-desc{font-size:13px;color:var(--muted);line-height:1.7;}
+.feat-tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:12px;}
+.feat-tag{font-size:11px;font-family:var(--mono);padding:3px 9px;border-radius:99px;
+  border:1px solid var(--border2);color:var(--muted2);}
+
+/* ── HOW IT WORKS ── */
+.steps-wrap{margin-top:4rem;display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:2rem;}
+.step-card{position:relative;}
+.step-num{font-family:var(--syne);font-size:11px;font-weight:700;color:var(--blue);
+  letter-spacing:0.1em;margin-bottom:1rem;display:flex;align-items:center;gap:10px;}
+.step-num::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,var(--border2),transparent);}
+.step-icon{font-size:28px;margin-bottom:1rem;}
+.step-title{font-family:var(--syne);font-size:17px;font-weight:700;letter-spacing:-0.3px;margin-bottom:8px;}
+.step-desc{font-size:13px;color:var(--muted);line-height:1.7;}
+.step-code{font-family:var(--mono);font-size:11px;color:var(--cyan);background:var(--cyan-dim);
+  border:1px solid rgba(34,211,238,0.15);border-radius:6px;padding:8px 12px;margin-top:12px;line-height:1.6;}
+
+/* ── PRICING ── */
+.pricing-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.5rem;margin-top:4rem;max-width:800px;}
+.price-card{background:var(--s1);border:1px solid var(--border2);border-radius:14px;padding:2rem;position:relative;}
+.price-card.featured{border-color:var(--blue);box-shadow:0 0 40px rgba(91,141,238,0.12);}
+.price-card.featured::before{content:'MOST POPULAR';position:absolute;top:-12px;left:50%;
+  transform:translateX(-50%);font-size:10px;font-family:var(--mono);font-weight:500;
+  color:var(--blue);background:var(--bg);padding:3px 14px;border:1px solid var(--blue);border-radius:99px;letter-spacing:0.1em;}
+.price-name{font-family:var(--syne);font-size:13px;font-weight:700;letter-spacing:0.08em;color:var(--muted);text-transform:uppercase;margin-bottom:1rem;}
+.price-amount{font-family:var(--syne);font-size:42px;font-weight:800;letter-spacing:-2px;line-height:1;margin-bottom:4px;}
+.price-amount span{font-size:18px;font-weight:500;color:var(--muted);letter-spacing:0;}
+.price-period{font-size:12px;color:var(--muted2);font-family:var(--mono);margin-bottom:1.5rem;}
+.price-divider{height:1px;background:var(--border);margin-bottom:1.5rem;}
+.price-features{display:flex;flex-direction:column;gap:10px;margin-bottom:2rem;}
+.pf{font-size:13px;color:var(--muted);display:flex;align-items:flex-start;gap:8px;}
+.pf::before{content:'✓';color:var(--green);flex-shrink:0;margin-top:1px;}
+.pf.dim::before{content:'—';color:var(--muted2);}
+.pf.dim{color:var(--muted2);}
+.price-btn{width:100%;padding:12px;border-radius:8px;font-family:var(--syne);font-weight:700;
+  font-size:14px;letter-spacing:0.03em;cursor:pointer;transition:all 0.2s;text-decoration:none;
+  display:block;text-align:center;}
+.price-btn.primary{background:linear-gradient(135deg,var(--blue2),var(--violet));color:#fff;border:none;
+  box-shadow:0 4px 20px rgba(91,141,238,0.3);}
+.price-btn.primary:hover{transform:translateY(-1px);box-shadow:0 6px 28px rgba(91,141,238,0.45);}
+.price-btn.ghost{background:transparent;border:1px solid var(--border2);color:var(--muted);}
+.price-btn.ghost:hover{border-color:var(--blue);color:var(--blue);}
+
+/* ── STATS TICKER ── */
+.stats-strip{border-top:1px solid var(--border);border-bottom:1px solid var(--border);
+  padding:1.5rem 2rem;display:flex;justify-content:center;gap:4rem;flex-wrap:wrap;
+  background:var(--s1);}
+.stat-item{text-align:center;}
+.stat-num{font-family:var(--syne);font-size:30px;font-weight:800;letter-spacing:-1px;
+  background:linear-gradient(135deg,var(--blue),var(--violet));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.stat-label{font-size:12px;color:var(--muted2);font-family:var(--mono);margin-top:2px;letter-spacing:0.05em;}
+
+/* ── FOOTER ── */
+footer{border-top:1px solid var(--border);padding:3rem 2rem;display:flex;
+  align-items:center;justify-content:space-between;flex-wrap:gap;gap:1rem;
+  max-width:1080px;margin:0 auto;}
+.footer-logo{font-family:var(--syne);font-weight:800;font-size:16px;display:flex;align-items:center;gap:8px;}
+.footer-logo .dot{width:7px;height:7px;border-radius:50%;background:var(--blue);}
+.footer-links{display:flex;gap:2rem;flex-wrap:wrap;}
+.footer-links a{font-size:12px;color:var(--muted2);text-decoration:none;transition:color 0.2s;font-family:var(--mono);}
+.footer-links a:hover{color:var(--blue);}
+.footer-right{font-size:12px;color:var(--muted2);font-family:var(--mono);}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar{width:6px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px;}
+
+/* ── REVEAL ── */
+.reveal{opacity:0;transform:translateY(24px);transition:opacity 0.7s ease,transform 0.7s ease;}
+.reveal.visible{opacity:1;transform:translateY(0);}
+</style>
+</head>
+<body>
+
+<div class="grid-bg"></div>
+<div class="orb orb1"></div>
+<div class="orb orb2"></div>
+<div class="orb orb3"></div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">
+    <div class="dot"></div>
+    Notionify AI
+  </div>
+  <div class="nav-links">
+    <a href="#features">Features</a>
+    <a href="#how">How it works</a>
+    <a href="#pricing">Pricing</a>
+    <a href="app.html">Launch App</a>
+  </div>
+  <a href="app.html" class="nav-cta">Get Started →</a>
+</nav>
+
+<!-- HERO -->
+<section>
+  <div class="hero">
+    <div class="hero-badge">✦ &nbsp;AI-Powered Notion Builder</div>
+    <h1>
+      <span class="line1">Your workspace,</span>
+      <span class="line2">built in seconds.</span>
+    </h1>
+    <p class="hero-sub">Describe what you need. Notionify AI generates a fully-linked Notion workspace — databases, formulas, relations, cover images, and sample data. Ready to use instantly.</p>
+    <div class="hero-actions">
+      <a href="app.html" class="btn-primary">✦ &nbsp;Build My Workspace <span>→</span></a>
+      <a href="#how" class="btn-secondary">See how it works</a>
+    </div>
+    <p class="hero-note">Free to use · Needs Groq API key + Notion integration · Open source</p>
+  </div>
+
+  <!-- DEMO WINDOW -->
+  <div class="hero-demo">
+    <div class="demo-window">
+      <div class="demo-bar">
+        <div class="demo-dot"></div><div class="demo-dot"></div><div class="demo-dot"></div>
+        <div class="demo-url">notionify.ai/app</div>
+      </div>
+      <div class="demo-body">
+        <div class="demo-left">
+          <div>
+            <div class="demo-label">NOTION INTEGRATION TOKEN</div>
+            <div class="demo-input">secret_••••••••••••••••••••••</div>
+          </div>
+          <div>
+            <div class="demo-label">DESCRIBE YOUR WORKSPACE</div>
+            <div class="demo-prompt">Build me a startup CRM with contacts linked to a deals pipeline, meeting notes per client, and a revenue formula tracking monthly ARR<span class="cursor"></span></div>
+          </div>
+          <div>
+            <div class="demo-label">FEATURES</div>
+            <div class="demo-features">
+              <div class="demo-feat on">Cover images</div>
+              <div class="demo-feat on">Relations</div>
+              <div class="demo-feat on">Formulas</div>
+              <div class="demo-feat on">Sample rows</div>
+              <div class="demo-feat on">Callouts</div>
+              <div class="demo-feat">GIFs</div>
+            </div>
+          </div>
+          <button class="demo-btn">✦ Generate &amp; Build in Notion</button>
+        </div>
+        <div class="demo-right">
+          <div class="demo-log-title">BUILD LOG</div>
+          <div class="demo-log">
+            <div class="dlog ok">Plan received — 3 databases, 2 pages</div>
+            <div class="dlog ok">Contacts DB created</div>
+            <div class="dlog ok">Deals Pipeline DB created</div>
+            <div class="dlog act">Adding relations between DBs…</div>
+            <div class="dlog">Meeting Notes page — pending</div>
+            <div class="dlog">Dashboard page — pending</div>
+            <div class="dlog">Sample rows — pending</div>
+          </div>
+          <div class="demo-prog">
+            <div class="dp-label"><span>Building workspace…</span><span>72%</span></div>
+            <div class="dp-bar"><div class="dp-fill"></div></div>
+          </div>
+          <div class="demo-steps">
+            <div class="ds done">✓ Design</div>
+            <div class="ds done">✓ DBs</div>
+            <div class="ds act">◈ Relations</div>
+            <div class="ds idle">Pages</div>
+            <div class="ds idle">Rows</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<div class="stats-strip reveal">
+  <div class="stat-item"><div class="stat-num">4,000</div><div class="stat-label">max tokens generated</div></div>
+  <div class="stat-item"><div class="stat-num">5+</div><div class="stat-label">database types</div></div>
+  <div class="stat-item"><div class="stat-num">10+</div><div class="stat-label">formula templates</div></div>
+  <div class="stat-item"><div class="stat-num">&lt;60s</div><div class="stat-label">avg build time</div></div>
+</div>
+
+<!-- FEATURES -->
+<section class="section" id="features">
+  <div class="section-inner">
+    <div class="section-tag">Features</div>
+    <h2 class="section-title reveal">Everything Notion can do,<br/>done for you automatically.</h2>
+    <p class="section-sub reveal">No more dragging blocks, wiring relations by hand, or writing formula syntax. Just describe — and it's built.</p>
+
+    <div class="features-grid reveal">
+      <div class="feat-card">
+        <div class="feat-icon">🧠</div>
+        <div class="feat-title">AI-Designed Structure</div>
+        <div class="feat-desc">LLaMA 3.3 70B architects your entire workspace — databases, pages, hierarchy — based on your description. It thinks like a Notion power user.</div>
+        <div class="feat-tags"><span class="feat-tag">Groq</span><span class="feat-tag">LLaMA 3.3</span></div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">⚙️</div>
+        <div class="feat-title">Working Formulas</div>
+        <div class="feat-desc">Auto-generates valid Notion formula syntax — XP calculations, level-up logic, score computations, progress percentages. No more formula errors.</div>
+        <div class="feat-tags"><span class="feat-tag">Notion formulas</span><span class="feat-tag">Auto-generated</span></div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">🔗</div>
+        <div class="feat-title">Database Relations</div>
+        <div class="feat-desc">Automatically wires relation and rollup properties between your databases after creation — so linked views actually work from day one.</div>
+        <div class="feat-tags"><span class="feat-tag">Relations</span><span class="feat-tag">Rollups</span></div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">🖼️</div>
+        <div class="feat-title">Cover Images</div>
+        <div class="feat-desc">Every page and database gets a contextual, high-quality cover photo from Unsplash — matched to the content type. Looks premium immediately.</div>
+        <div class="feat-tags"><span class="feat-tag">Unsplash</span><span class="feat-tag">Auto-matched</span></div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">🧱</div>
+        <div class="feat-title">Rich Page Content</div>
+        <div class="feat-desc">Pages get callout panels, toggle sections, to-do lists, dividers, quotes, and numbered sections — not blank pages with just a title.</div>
+        <div class="feat-tags"><span class="feat-tag">Toggles</span><span class="feat-tag">Callouts</span><span class="feat-tag">Blocks</span></div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">📊</div>
+        <div class="feat-title">Sample Data</div>
+        <div class="feat-desc">Every database comes pre-filled with realistic sample rows — so your workspace looks alive and usable from the first second you open it.</div>
+        <div class="feat-tags"><span class="feat-tag">Pre-filled</span><span class="feat-tag">Realistic</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="section" id="how" style="background:var(--s1);border-top:1px solid var(--border);border-bottom:1px solid var(--border);">
+  <div class="section-inner">
+    <div class="section-tag">How it works</div>
+    <h2 class="section-title reveal">Three steps to a<br/>production-ready workspace.</h2>
+
+    <div class="steps-wrap">
+      <div class="step-card reveal">
+        <div class="step-num">STEP 01</div>
+        <div class="step-icon">🔑</div>
+        <div class="step-title">Connect your accounts</div>
+        <div class="step-desc">Paste your Groq API key (free) and Notion integration token. Share a parent page with the integration. That's all the setup required.</div>
+        <div class="step-code">groq.com/console → Free API key<br/>notion.so/my-integrations → Token</div>
+      </div>
+      <div class="step-card reveal">
+        <div class="step-num">STEP 02</div>
+        <div class="step-icon">✍️</div>
+        <div class="step-title">Describe your workspace</div>
+        <div class="step-desc">Type what you want in plain English. Be specific — mention databases, linked views, formula types, or use one of the built-in prompt chips.</div>
+        <div class="step-code">"Build a freelancer CRM with<br/>clients → projects → invoices,<br/>formula for total revenue…"</div>
+      </div>
+      <div class="step-card reveal">
+        <div class="step-num">STEP 03</div>
+        <div class="step-icon">⚡</div>
+        <div class="step-title">Watch it build live</div>
+        <div class="step-desc">Notionify AI calls the Notion API in real time. Watch each database, relation, and page get created in your live workspace. Done in under 60 seconds.</div>
+        <div class="step-code">Databases → Relations → Pages<br/>→ Sample rows → Done ✓</div>
+      </div>
+      <div class="step-card reveal">
+        <div class="step-num">STEP 04</div>
+        <div class="step-icon">🎯</div>
+        <div class="step-title">Open and start using it</div>
+        <div class="step-desc">Click the link in the builder — your workspace opens in Notion, fully structured, with covers, sample data, and all properties wired up.</div>
+        <div class="step-code">↗ Open in Notion → Ready to use</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section class="section" id="pricing">
+  <div class="section-inner">
+    <div class="section-tag">Pricing</div>
+    <h2 class="section-title reveal">Free and open source.<br/>No surprises.</h2>
+    <p class="section-sub reveal">Notionify AI is self-hosted. You pay only for what you use — and Groq's free tier covers hundreds of workspace builds per month.</p>
+
+    <div class="pricing-grid reveal">
+      <div class="price-card">
+        <div class="price-name">Self-Hosted</div>
+        <div class="price-amount">$0<span>/mo</span></div>
+        <div class="price-period">Free forever · Run locally or deploy</div>
+        <div class="price-divider"></div>
+        <div class="price-features">
+          <div class="pf">Full source code on GitHub</div>
+          <div class="pf">Unlimited workspace builds</div>
+          <div class="pf">All features included</div>
+          <div class="pf">Groq free tier (~1000 req/day)</div>
+          <div class="pf">Run on localhost:3000</div>
+        </div>
+        <a href="https://github.com" class="price-btn ghost">View on GitHub →</a>
+      </div>
+      <div class="price-card featured">
+        <div class="price-name">Deploy on Railway</div>
+        <div class="price-amount">~$1<span>/mo</span></div>
+        <div class="price-period">Railway Hobby plan · Always-on URL</div>
+        <div class="price-divider"></div>
+        <div class="price-features">
+          <div class="pf">Permanent HTTPS URL</div>
+          <div class="pf">Share with team or clients</div>
+          <div class="pf">One-click deploy from GitHub</div>
+          <div class="pf">Auto-restarts, no maintenance</div>
+          <div class="pf">Custom domain support</div>
+        </div>
+        <a href="app.html" class="price-btn primary">Deploy Now →</a>
+      </div>
+    </div>
+
+    <div style="margin-top:2.5rem;padding:1.5rem;background:var(--s1);border:1px solid var(--border2);border-radius:12px;max-width:600px;" class="reveal">
+      <div style="font-size:13px;color:var(--muted);line-height:1.8;">
+        <strong style="color:var(--text);font-family:var(--syne);">What you'll actually spend:</strong><br/>
+        Groq free tier: <span style="color:var(--cyan);font-family:var(--mono);">0 req/day × 0 cost</span> (up to daily limit) ·
+        Notion API: <span style="color:var(--cyan);font-family:var(--mono);">Free forever</span> ·
+        Hosting: <span style="color:var(--cyan);font-family:var(--mono);">$0 locally or ~$1/mo Railway</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER CTA -->
+<section style="padding:5rem 2rem;text-align:center;">
+  <div style="max-width:600px;margin:0 auto;" class="reveal">
+    <div style="font-family:var(--syne);font-size:clamp(28px,4vw,44px);font-weight:800;letter-spacing:-1px;line-height:1.1;margin-bottom:1rem;">
+      Ready to build your<br/>
+      <span style="background:linear-gradient(135deg,var(--blue),var(--violet));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">perfect workspace?</span>
+    </div>
+    <p style="color:var(--muted);margin-bottom:2rem;font-size:16px;font-weight:300;">It takes 60 seconds. No card required.</p>
+    <a href="app.html" class="btn-primary" style="font-size:16px;padding:16px 36px;">✦ &nbsp;Launch Notionify AI →</a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo"><div class="dot"></div>Notionify AI</div>
+  <div class="footer-links">
+    <a href="https://github.com" target="_blank">GitHub</a>
+    <a href="https://groq.com" target="_blank">Groq API</a>
+    <a href="https://notion.so/my-integrations" target="_blank">Notion Docs</a>
+    <a href="app.html">Launch App</a>
+  </div>
+  <div class="footer-right">Built with Groq + Notion API</div>
+</footer>
+
+<script>
+// Scroll reveal
+const observer=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');}});
+},{threshold:0.1,rootMargin:'0px 0px -40px 0px'});
+document.querySelectorAll('.reveal').forEach(el=>observer.observe(el));
+
+// Typing animation in demo
+const phrases=[
+  'Build me a startup CRM with contacts linked to a deals pipeline, meeting notes per client, and a revenue formula tracking monthly ARR',
+  'Freelancer HQ: clients → projects → invoices with formula totals, contract templates, time tracker',
+  'Product OS: roadmap linked to feature requests, sprint tracker with velocity formula, bug DB',
+];
+let pi=0,ci=0,del=false;
+const promptEl=document.querySelector('.demo-prompt');
+function type(){
+  const p=phrases[pi];
+  if(!del){
+    if(ci<=p.length){
+      const visible=p.slice(0,ci++);
+      promptEl.innerHTML=visible+'<span class="cursor"></span>';
+      setTimeout(type,ci===p.length?2500:28);
+    }else{del=true;setTimeout(type,300);}
+  }else{
+    if(ci>0){
+      const visible=p.slice(0,--ci);
+      promptEl.innerHTML=visible+'<span class="cursor"></span>';
+      setTimeout(type,12);
+    }else{del=false;pi=(pi+1)%phrases.length;setTimeout(type,500);}
+  }
+}
+type();
+</script>
+</body>
+</html>
